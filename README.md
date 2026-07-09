@@ -4,10 +4,47 @@
 
 ## 技术栈
 
-- **前端**: Next.js 15+ / TypeScript / Tailwind CSS / shadcn/ui
-- **后端**: Next.js Server Actions + Supabase API
-- **数据库**: Supabase PostgreSQL
+- **框架**: Next.js 16 (App Router) + TypeScript
+- **样式**: Tailwind CSS v4
+- **代码规范**: ESLint
+- **数据库**: Supabase PostgreSQL（待接入）
 - **部署**: Vercel + Cloudflare
+
+## 快速开始
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+
+# 启动生产服务器
+npm start
+
+# 代码检查
+npm run lint
+```
+
+开发服务器地址：[http://localhost:3000](http://localhost:3000)
+
+## 项目结构
+
+```
+retro-game-wiki/
+├── app/              # Next.js App Router 页面
+├── components/       # React 组件（待创建）
+├── lib/              # 工具函数与数据访问层（待创建）
+├── types/            # TypeScript 类型定义（待创建）
+├── hooks/            # React Hooks（待创建）
+├── public/           # 静态资源
+├── docs/             # 项目设计文档
+├── prompts/          # AI Prompt 模板
+└── supabase/         # 数据库 migration（待创建）
+```
 
 ## 项目文档
 
@@ -24,8 +61,12 @@
 | 07 | seo-architecture | SEO 架构 |
 | 08 | deployment-and-operation | 部署运营方案 |
 
+项目分析报告见 [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md)
+
 ## 开发阶段
 
-详见 [03-ai-coding-roadmap.md](docs/03-ai-coding-roadmap.md)
+详见 [docs/03-ai-coding-roadmap.md](docs/03-ai-coding-roadmap.md)
+
+当前进度：**Phase 0 项目初始化** ✅
 
 第一阶段目标：MVP 上线（基础网站 + 后台 CMS + 首批内容）
