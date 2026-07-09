@@ -107,3 +107,14 @@ export async function getGuideSections(guideId: string): Promise<ApiResult<Guide
   if (error) return fail(error.message);
   return ok(data);
 }
+
+/** 攻略类型中文标签映射 */
+export const GUIDE_TYPE_LABELS: Record<string, string> = {
+  main_story: '主线攻略',
+  boss: 'Boss 战',
+  sidequest: '支线任务',
+  item: '道具收集',
+  secret: '秘籍隐藏',
+  character: '角色解析',
+  ending: '结局达成',
+};
