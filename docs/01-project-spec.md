@@ -470,6 +470,8 @@ SEO流量入口。
 
 ## games 游戏表
 
+> **设计修订 v1.1**：移除 `platform_id`（改用 game_platforms 多对多）、`genre`（改用 game_genres 多对多）、`seo_title`/`seo_description`（统一用 seo_metadata 表）。详见 [02-database-schema.md](02-database-schema.md)。
+
 字段：
 
 ```
@@ -479,11 +481,9 @@ name_cn
 
 name_en
 
+name_jp
+
 slug
-
-platform_id
-
-genre
 
 release_year
 
@@ -491,13 +491,17 @@ developer
 
 publisher
 
+region
+
 description
+
+story_summary
 
 cover_url
 
-seo_title
+banner_url
 
-seo_description
+status
 
 created_at
 
@@ -524,6 +528,8 @@ description
 
 ## guides 攻略表
 
+> **设计修订 v1.1**：移除 `seo_title`/`seo_description`，统一用 seo_metadata 表。`type` 改名为 `guide_type`，详见 [02-database-schema.md](02-database-schema.md)。
+
 ```
 id
 
@@ -533,13 +539,15 @@ title
 
 slug
 
-type
+guide_type
+
+summary
 
 content
 
-seo_title
+difficulty
 
-seo_description
+is_featured
 
 status
 
@@ -899,6 +907,8 @@ Google AdSense
 
 # Phase 1 MVP
 
+> **设计修订 v1.1**：本大阶段对应 [03-ai-coding-roadmap.md](03-ai-coding-roadmap.md) 的细粒度 Phase 0-5 + 8 + 11。
+
 目标：
 
 上线基础网站。
@@ -912,10 +922,14 @@ Google AdSense
 * 游戏详情页
 * 攻略页面
 * 后台编辑
+* SEO 基础（Metadata + Sitemap + Schema）
+* 部署上线
 
 ---
 
 # Phase 2 内容系统
+
+> 对应 roadmap Phase 6
 
 增加：
 
@@ -928,6 +942,8 @@ Google AdSense
 
 # Phase 3 自动化
 
+> 对应 roadmap Phase 7
+
 增加：
 
 * 爬虫
@@ -937,6 +953,8 @@ Google AdSense
 ---
 
 # Phase 4 商业化
+
+> 对应 roadmap Phase 9-10
 
 增加：
 
@@ -1006,9 +1024,27 @@ docs/project.md
 
 # 17. MVP成功标准
 
-第一版上线：
+> **设计修订 v1.1**：原"100 游戏 / 500 攻略"与 [06-mvp-content-list.md](06-mvp-content-list.md) §8 的"10 旗舰优先"冲突。现统一为分阶段目标。
 
-拥有：
+MVP 分两步达成：
+
+## 第一步：旗舰上线（首个可发布版本）
+
+```
+10个旗舰游戏页面
+
+每游戏 ≥ 5 篇攻略（共 50+ 篇）
+
+5个核心平台分类（FC/SFC/GBA/PS1/PSP-NDS）
+
+完整SEO（Metadata + Sitemap + Schema）
+
+后台CMS可用
+```
+
+> 10 个旗舰游戏清单见 [06-mvp-content-list.md](06-mvp-content-list.md) §9
+
+## 第二步：MVP 完整版
 
 ```
 100个游戏页面
@@ -1021,6 +1057,8 @@ docs/project.md
 
 广告接口
 ```
+
+> 第一步是 MVP 上线的最低标准，第二步是 Phase 1 大阶段的完整目标。
 
 ---
 

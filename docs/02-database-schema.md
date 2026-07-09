@@ -200,6 +200,8 @@ updated_at
 
 ## Schema
 
+> **设计修订 v1.1**：移除 `platform_id`（改用 game_platforms 多对多，见 §5）、移除 `genre`（改用 game_genres 多对多，见 §7）、移除 `seo_title`/`seo_description`（统一用 seo_metadata 表，见 §18）。
+
 ```sql
 games
 
@@ -213,12 +215,6 @@ name_en
 name_jp
 
 slug
-
-
-platform_id
-
-
-genre
 
 
 release_year
@@ -248,17 +244,24 @@ banner_url
 status
 
 
-seo_title
-
-
-seo_description
-
-
 created_at
 
 updated_at
 
 ```
+
+字段说明：
+
+| 字段 | 说明 |
+|------|------|
+| status | draft / review / published / archived |
+| cover_url | 封面图 URL |
+| banner_url | 详情页横幅图 URL |
+| region | 发行地区（JP/US/EU/CN 等） |
+
+> 平台关系见 [game_platforms](#5-game_platforms-游戏与平台关系)
+> 类型关系见 [game_genres](#7-game_genres)
+> SEO 数据见 [seo_metadata](#18-seo-表)
 
 ---
 
@@ -272,9 +275,7 @@ updated_at
 
 "slug":"final-fantasy-6",
 
-"release_year":1994,
-
-"genre":"RPG"
+"release_year":1994
 }
 ```
 
@@ -424,17 +425,13 @@ is_featured
 status
 
 
-seo_title
-
-
-seo_description
-
-
 created_at
 
 
 updated_at
 ```
+
+> **设计修订 v1.1**：移除 `seo_title`/`seo_description`，统一使用 [seo_metadata](#18-seo-表) 表管理（entity_type='guide'）。
 
 ---
 
@@ -480,6 +477,36 @@ Markdown格式。
 
 内容...
 ```
+
+---
+
+## content 与 guide_sections 的关系
+
+> **设计修订 v1.1**：明确两者关系，避免歧义。
+
+**content 字段**：攻略正文，**主存储**。所有攻略必须有 content。
+
+**guide_sections 表**：**可选**，仅用于超长攻略（如完整流程攻略 100+ 章节）的章节拆分。
+
+关系：
+
+```
+普通攻略（< 5000 字）
+  → 只用 guides.content
+  → 不创建 guide_sections 记录
+
+超长攻略（≥ 5000 字 或 多章节）
+  → guides.content 仍保留完整内容（用于搜索索引与摘要展示）
+  → 同时在 guide_sections 拆分章节（用于目录导航与分章渲染）
+  → guide_sections.content 为该章节内容
+  → 渲染时优先用 guide_sections 拼接，无 sections 时回退到 guides.content
+```
+
+原则：
+
+1. guides.content 永远是完整内容的**真实来源**
+2. guide_sections 是 content 的**分章视图**，不是独立内容
+3. 编辑 guide_sections 后，需同步回写 guides.content
 
 ---
 
@@ -856,6 +883,8 @@ tag_id
 
 # 18. SEO 表
 
+> **设计修订 v1.1**：本表是所有实体的**唯一 SEO 数据源**。games / guides 等表不再内嵌 seo_title / seo_description 字段，统一通过 entity_type + entity_id 关联本表。
+
 统一SEO管理。
 
 ## seo_metadata
@@ -884,15 +913,37 @@ keywords
 
 canonical_url
 
+
+og_image_url
+
+
+noindex
+
+
+created_at
+
+
+updated_at
+
 ```
 
-支持：
+字段说明：
 
-游戏
+| 字段 | 说明 |
+|------|------|
+| entity_type | 实体类型：game / guide / platform / topic / news |
+| entity_id | 关联实体 UUID |
+| title | SEO Title（≤ 60 字符） |
+| description | Meta Description（≤ 160 字符） |
+| keywords | 关键词数组，text[] |
+| canonical_url | 规范 URL，防重复收录 |
+| og_image_url | Open Graph 分享图 |
+| noindex | 是否禁止索引（bool，默认 false） |
 
-攻略
+约束：
 
-专题。
+- (entity_type, entity_id) 唯一索引，一个实体一条 SEO 记录
+- 支持：游戏 / 攻略 / 平台 / 专题 / 新闻
 
 ---
 
