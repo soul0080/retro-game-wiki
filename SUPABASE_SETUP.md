@@ -17,7 +17,7 @@
 
 ## 2. 执行数据库 Migration
 
-进入项目的 **SQL Editor**，按顺序执行以下 5 个文件：
+进入项目的 **SQL Editor**，按顺序执行以下 6 个文件：
 
 | 顺序 | 文件 | 说明 |
 |------|------|------|
@@ -25,7 +25,8 @@
 | 2 | [002_games.sql](supabase/migrations/002_games.sql) | 游戏主表 + 平台关系 + 类型关系 |
 | 3 | [003_guides.sql](supabase/migrations/003_guides.sql) | 攻略表 + 攻略章节表 |
 | 4 | [004_game_entities.sql](supabase/migrations/004_game_entities.sql) | 角色 / Boss / 道具 / 秘籍 / 模拟器教程 |
-| 5 | [005_seo_and_meta.sql](supabase/migrations/005_seo_and_meta.sql) | SEO / 媒体 / 标签 / 新闻 / 后台设置 / AI 记录 |
+| 5 | [005_seo_and_meta.sql](supabase/migrations/005_seo_and_meta.sql) | SEO / 媒体 / 标签 / 新闻 / 后台设置 |
+| 6 | [006_remove_ai_generations.sql](supabase/migrations/006_remove_ai_generations.sql) | 移除 ai_generations 表（AI 模块已废弃，改用本地 AI 工具辅助） |
 
 **执行方式**：
 1. 打开 SQL Editor
@@ -35,7 +36,7 @@
 
 > 必须按顺序执行，后续表依赖前面表的外键。
 
-执行后验证：在 Table Editor 应看到 18 张表，platforms 和 genres 表各有初始数据。
+执行后验证：在 Table Editor 应看到 17 张表，platforms 和 genres 表各有初始数据。
 
 ---
 
@@ -78,7 +79,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ---
 
-## 5. 表结构概览（18 张表）
+## 5. 表结构概览（17 张表）
 
 ```
 平台与类型
@@ -107,9 +108,10 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ├── tags               标签
 ├── game_tags          游戏↔标签（多对多）
 ├── news               新闻
-├── admin_settings     后台设置
-└── ai_generations     AI 生成记录
+└── admin_settings     后台设置
 ```
+
+> ai_generations 表已通过 [006_remove_ai_generations.sql](supabase/migrations/006_remove_ai_generations.sql) 移除，AI 内容生产改为使用本地 AI 工具辅助。
 
 设计文档：[docs/02-database-schema.md](docs/02-database-schema.md)
 修订记录：[DATABASE_REVISIONS.md](DATABASE_REVISIONS.md)

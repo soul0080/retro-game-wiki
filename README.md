@@ -42,7 +42,6 @@ retro-game-wiki/
 ├── hooks/            # React Hooks（待创建）
 ├── public/           # 静态资源
 ├── docs/             # 项目设计文档
-├── prompts/          # AI Prompt 模板
 └── supabase/         # 数据库 migration（待创建）
 ```
 

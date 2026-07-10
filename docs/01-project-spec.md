@@ -119,10 +119,6 @@ Supabase
     |
 PostgreSQL
 
-AI Service
-
-Crawler Service
-
 Storage
 
 Analytics
@@ -227,7 +223,6 @@ Redis：
 用途：
 
 * 热门页面缓存
-* AI任务队列
 
 ---
 
@@ -261,12 +256,6 @@ retro-game-wiki/
 ├── lib/
 │
 ├── database/
-│
-├── crawler/
-│
-├── ai/
-│
-├── prompts/
 │
 └── docs/
 
@@ -642,114 +631,15 @@ settings
 
 ---
 
-# 9. AI内容生产系统
+# 9. AI内容生产系统（已移除）
 
-目标：
-
-建立自动内容流水线。
-
-流程：
-
-```
-游戏名称输入
-
-↓
-
-AI资料收集
-
-↓
-
-生成游戏基础资料
-
-↓
-
-生成攻略目录
-
-↓
-
-生成SEO内容
-
-↓
-
-人工审核
-
-↓
-
-发布
-```
+> AI 内容生产改为使用本地 AI 工具（如 CC、trae）辅助，不再内置 AI 功能模块。
 
 ---
 
-AI Prompt目录：
+# 10. 爬虫系统（已移除）
 
-```
-/prompts
-
-game-summary.md
-
-guide-generator.md
-
-seo-generator.md
-
-content-review.md
-```
-
----
-
-# 10. 爬虫系统
-
-## 目标
-
-收集：
-
-* 游戏资料
-* 官方信息
-* 新闻
-* 更新信息
-
----
-
-目录：
-
-```
-crawler/
-
-steam.py
-
-wiki_source.py
-
-news.py
-
-parser.py
-```
-
----
-
-流程：
-
-```
-Crawler
-
-↓
-
-数据清洗
-
-↓
-
-AI整理
-
-↓
-
-数据库
-
-↓
-
-审核
-
-↓
-
-发布
-```
+> 内容抓取与整理改为使用本地 AI 工具辅助，不再内置爬虫系统。
 
 ---
 
@@ -780,8 +670,6 @@ Route:
 ```
 攻略编辑
 
-AI生成
-
 发布审核
 ```
 
@@ -797,20 +685,6 @@ Description
 关键词
 
 Sitemap
-```
-
----
-
-## AI工具
-
-功能：
-
-```
-生成攻略
-
-生成摘要
-
-优化SEO
 ```
 
 ---
@@ -929,11 +803,10 @@ Google AdSense
 
 # Phase 2 内容系统
 
-> 对应 roadmap Phase 6
+> 对应 roadmap Phase 6（AI 内容生产已移除，改用本地 AI 工具辅助）
 
 增加：
 
-* AI生成内容
 * 批量导入
 * SEO优化
 * Sitemap
@@ -942,13 +815,11 @@ Google AdSense
 
 # Phase 3 自动化
 
-> 对应 roadmap Phase 7
+> 对应 roadmap Phase 7（爬虫系统已移除，改用本地 AI 工具辅助）
 
 增加：
 
-* 爬虫
-* AI审核
-* 自动更新
+* 内容更新流程
 
 ---
 
@@ -1070,10 +941,8 @@ MVP 分两步达成：
 中文最大的经典游戏攻略数据库
 
 +
-模拟器知识库
 
-+
-AI驱动内容生产平台
+模拟器知识库
 ```
 
 ---

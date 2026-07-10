@@ -979,50 +979,9 @@ value
 
 ---
 
-# 20. AI生成记录
+# 20. AI生成记录（已移除）
 
-非常重要。
-
-记录AI生产内容。
-
-## ai_generations
-
-```sql
-ai_generations
-
-
-id
-
-
-entity_type
-
-
-entity_id
-
-
-prompt
-
-
-model
-
-
-output
-
-
-status
-
-
-created_at
-
-```
-
-用途：
-
-查看：
-
-AI生成历史。
-
-方便重新生成。
+> AI 内容生产改为使用本地 AI 工具（如 CC、trae）辅助，不再内置 ai_generations 表与相关模块。
 
 ---
 
@@ -1043,7 +1002,7 @@ archived
 流程：
 
 ```
-AI生成
+内容创建
 
 ↓
 
@@ -1163,12 +1122,10 @@ MVP:
 
 3. 攻略使用 Markdown。
 
-4. AI生成必须记录。
+4. SEO字段每个实体都有。
 
-5. SEO字段每个实体都有。
+5. 不为当前需求过度设计。
 
-6. 不为当前需求过度设计。
-
-7. 保证未来扩展。
+6. 保证未来扩展。
 
 END

@@ -45,9 +45,6 @@ export type MediaEntityType =
   | 'guide'
   | 'emulator_guide';
 
-/** AI 生成状态枚举 */
-export type AiGenerationStatus = 'pending' | 'success' | 'failed';
-
 // ============================================================================
 // 表结构类型
 // ============================================================================
@@ -278,20 +275,6 @@ export interface AdminSetting {
   updated_at: string;
 }
 
-/** AI 生成记录表 ai_generations */
-export interface AiGeneration {
-  id: string;
-  entity_type: string;
-  entity_id: string | null;
-  prompt: string;
-  model: string | null;
-  output: string | null;
-  tokens_used: number | null;
-  status: AiGenerationStatus;
-  error: string | null;
-  created_at: string;
-}
-
 // ============================================================================
 // 复合类型（用于查询结果的关联数据）
 // ============================================================================
@@ -407,11 +390,6 @@ export interface Database {
         Row: AdminSetting;
         Insert: Omit<AdminSetting, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<AdminSetting, 'id' | 'created_at' | 'updated_at'>>;
-      };
-      ai_generations: {
-        Row: AiGeneration;
-        Insert: Omit<AiGeneration, 'id' | 'created_at'>;
-        Update: Partial<Omit<AiGeneration, 'id' | 'created_at'>>;
       };
     };
   };
