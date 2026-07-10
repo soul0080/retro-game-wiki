@@ -9,6 +9,8 @@ const NAV_ITEMS = [
   { href: '/admin/bosses', label: 'Boss 管理', icon: '👹' },
   { href: '/admin/items', label: '道具管理', icon: '🗡️' },
   { href: '/admin/cheats', label: '秘籍管理', icon: '🎮' },
+  { href: '/admin/news', label: '新闻管理', icon: '📰' },
+  { href: '/admin/emulator-guides', label: '模拟器教程', icon: '🕹️' },
 ];
 
 export function AdminSidebar() {

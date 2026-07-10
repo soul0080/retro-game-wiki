@@ -6,7 +6,7 @@
 
 import { createServerClient } from '@/lib/supabaseClient';
 import { ok, fail, type ApiResult } from '@/lib/api';
-import type { Game, Guide, Platform, Genre, Character, Boss, Item, Cheat } from '@/types/database';
+import type { Game, Guide, Platform, Genre, Character, Boss, Item, Cheat, News, EmulatorGuide } from '@/types/database';
 
 // ============ 读取（含草稿） ============
 
@@ -460,6 +460,125 @@ export async function adminUpdateCheat(id: string, data: CheatUpdate): Promise<A
 export async function adminDeleteCheat(id: string): Promise<ApiResult<void>> {
   const supabase = createServerClient();
   const { error } = await supabase.from('cheats').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
+// ============ 新闻管理 ============
+
+type NewsInsert = Omit<News, 'id' | 'created_at' | 'updated_at'>;
+type NewsUpdate = Partial<NewsInsert>;
+
+/** 获取新闻列表（可按 status 筛选），按 updated_at desc 排序 */
+export async function adminGetNews(options?: {
+  status?: string;
+}): Promise<ApiResult<News[]>> {
+  const { status } = options || {};
+  const supabase = createServerClient();
+  let query = supabase
+    .from('news')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (status) query = query.eq('status', status);
+  const { data, error } = await query;
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 按 id 获取新闻 */
+export async function adminGetNewsById(id: string): Promise<ApiResult<News>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.from('news').select('*').eq('id', id).single();
+  if (error || !data) return fail('新闻不存在');
+  return ok(data);
+}
+
+/** 新增新闻 */
+export async function adminCreateNews(data: NewsInsert): Promise<ApiResult<News>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('news')
+    .insert(data as never)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 更新新闻 */
+export async function adminUpdateNews(id: string, data: NewsUpdate): Promise<ApiResult<News>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('news')
+    .update(data as never)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 删除新闻 */
+export async function adminDeleteNews(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('news').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
+// ============ 模拟器教程管理 ============
+
+type EmulatorGuideInsert = Omit<EmulatorGuide, 'id' | 'created_at' | 'updated_at'>;
+type EmulatorGuideUpdate = Partial<EmulatorGuideInsert>;
+
+/** 获取模拟器教程列表，按 updated_at desc 排序 */
+export async function adminGetEmulatorGuides(): Promise<ApiResult<EmulatorGuide[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('emulator_guides')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 按 id 获取模拟器教程 */
+export async function adminGetEmulatorGuideById(id: string): Promise<ApiResult<EmulatorGuide>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.from('emulator_guides').select('*').eq('id', id).single();
+  if (error || !data) return fail('模拟器教程不存在');
+  return ok(data);
+}
+
+/** 新增模拟器教程 */
+export async function adminCreateEmulatorGuide(data: EmulatorGuideInsert): Promise<ApiResult<EmulatorGuide>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('emulator_guides')
+    .insert(data as never)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 更新模拟器教程 */
+export async function adminUpdateEmulatorGuide(id: string, data: EmulatorGuideUpdate): Promise<ApiResult<EmulatorGuide>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('emulator_guides')
+    .update(data as never)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 删除模拟器教程 */
+export async function adminDeleteEmulatorGuide(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('emulator_guides').delete().eq('id', id);
   if (error) return fail(error.message);
   return ok(undefined);
 }
