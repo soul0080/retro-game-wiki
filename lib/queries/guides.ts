@@ -54,6 +54,17 @@ export async function getFeaturedGuides(limit = 6): Promise<ApiResult<GuideListI
   return ok(data);
 }
 
+/** 获取所有已发布攻略的 slug + updated_at（sitemap 用） */
+export async function getPublishedGuideSlugs(): Promise<ApiResult<{ slug: string; updated_at: string }[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('guides')
+    .select('slug, updated_at')
+    .eq('status', 'published');
+  if (error) return fail(error.message);
+  return ok(data);
+}
+
 /** 获取某游戏下的攻略 */
 export async function getGuidesByGameId(gameId: string): Promise<ApiResult<Guide[]>> {
   const supabase = createServerClient();

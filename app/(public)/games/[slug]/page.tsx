@@ -44,6 +44,28 @@ export default async function GameDetailPage({ params }: PageProps) {
   const guidesResult = await getGuidesByGameId(game.id);
   const guides = guidesResult.success ? guidesResult.data : [];
 
+  // Game Schema.org 结构化数据（对应 docs/07-seo-architecture.md §8）
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const gameSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoGame',
+    name: game.name_cn,
+    ...(game.name_en ? { alternateName: game.name_en } : {}),
+    description: game.description || `${game.name_cn} - 攻略、角色、Boss 资料`,
+    ...(game.developer ? { developer: { '@type': 'Organization', name: game.developer } } : {}),
+    ...(game.publisher ? { publisher: { '@type': 'Organization', name: game.publisher } } : {}),
+    ...(game.release_year ? { datePublished: String(game.release_year) } : {}),
+    ...(game.cover_url ? { image: game.cover_url } : {}),
+    ...(game.genres && game.genres.length > 0
+      ? { genre: game.genres.map((g) => g.name).join(', ') }
+      : {}),
+    ...(game.platforms && game.platforms.length > 0
+      ? { gamePlatform: game.platforms.map((p) => p.name) }
+      : {}),
+    url: `${siteUrl}/games/${game.slug}`,
+    inLanguage: 'zh-CN',
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
       <Breadcrumb
@@ -154,6 +176,11 @@ export default async function GameDetailPage({ params }: PageProps) {
             description: game.description,
           }),
         }}
+      />
+      {/* Game Schema.org 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(gameSchema) }}
       />
     </div>
   );

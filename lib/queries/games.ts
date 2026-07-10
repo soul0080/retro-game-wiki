@@ -95,6 +95,17 @@ export async function getFeaturedGames(limit = 8): Promise<ApiResult<Game[]>> {
   return ok(data);
 }
 
+/** 获取所有已发布游戏的 slug + updated_at（sitemap 用） */
+export async function getPublishedGameSlugs(): Promise<ApiResult<{ slug: string; updated_at: string }[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('games')
+    .select('slug, updated_at')
+    .eq('status', 'published');
+  if (error) return fail(error.message);
+  return ok(data);
+}
+
 /** 按 slug 获取游戏详情（含平台、类型、标签） */
 export async function getGameBySlug(slug: string): Promise<ApiResult<GameWithRelations>> {
   const supabase = createServerClient();
