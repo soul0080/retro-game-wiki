@@ -7,6 +7,8 @@ const NAV_ITEMS = [
   { href: '/admin/guides', label: '攻略管理', icon: '📖' },
   { href: '/admin/characters', label: '角色管理', icon: '🧙' },
   { href: '/admin/bosses', label: 'Boss 管理', icon: '👹' },
+  { href: '/admin/items', label: '道具管理', icon: '🗡️' },
+  { href: '/admin/cheats', label: '秘籍管理', icon: '🎮' },
 ];
 
 export function AdminSidebar() {

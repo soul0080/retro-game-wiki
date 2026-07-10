@@ -6,7 +6,7 @@
 
 import { createServerClient } from '@/lib/supabaseClient';
 import { ok, fail, type ApiResult } from '@/lib/api';
-import type { Game, Guide, Platform, Genre, Character, Boss } from '@/types/database';
+import type { Game, Guide, Platform, Genre, Character, Boss, Item, Cheat } from '@/types/database';
 
 // ============ 读取（含草稿） ============
 
@@ -338,6 +338,128 @@ export async function adminUpdateBoss(id: string, data: BossUpdate): Promise<Api
 export async function adminDeleteBoss(id: string): Promise<ApiResult<void>> {
   const supabase = createServerClient();
   const { error } = await supabase.from('bosses').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
+// ============ 道具管理 ============
+
+type ItemInsert = Omit<Item, 'id' | 'created_at' | 'updated_at'>;
+type ItemUpdate = Partial<ItemInsert>;
+
+/** 获取道具列表（可按 game_id 筛选），按 updated_at desc 排序 */
+export async function adminGetItems(
+  gameId?: string
+): Promise<ApiResult<Item[]>> {
+  const supabase = createServerClient();
+  let query = supabase
+    .from('items')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (gameId) query = query.eq('game_id', gameId);
+  const { data, error } = await query;
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 按 id 获取道具 */
+export async function adminGetItemById(id: string): Promise<ApiResult<Item>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.from('items').select('*').eq('id', id).single();
+  if (error || !data) return fail('道具不存在');
+  return ok(data);
+}
+
+/** 新增道具 */
+export async function adminCreateItem(data: ItemInsert): Promise<ApiResult<Item>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('items')
+    .insert(data as never)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 更新道具 */
+export async function adminUpdateItem(id: string, data: ItemUpdate): Promise<ApiResult<Item>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('items')
+    .update(data as never)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 删除道具 */
+export async function adminDeleteItem(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('items').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
+// ============ 秘籍管理 ============
+
+type CheatInsert = Omit<Cheat, 'id' | 'created_at' | 'updated_at'>;
+type CheatUpdate = Partial<CheatInsert>;
+
+/** 获取秘籍列表（可按 game_id 筛选），按 updated_at desc 排序 */
+export async function adminGetCheats(
+  gameId?: string
+): Promise<ApiResult<Cheat[]>> {
+  const supabase = createServerClient();
+  let query = supabase
+    .from('cheats')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (gameId) query = query.eq('game_id', gameId);
+  const { data, error } = await query;
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 按 id 获取秘籍 */
+export async function adminGetCheatById(id: string): Promise<ApiResult<Cheat>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.from('cheats').select('*').eq('id', id).single();
+  if (error || !data) return fail('秘籍不存在');
+  return ok(data);
+}
+
+/** 新增秘籍 */
+export async function adminCreateCheat(data: CheatInsert): Promise<ApiResult<Cheat>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('cheats')
+    .insert(data as never)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 更新秘籍 */
+export async function adminUpdateCheat(id: string, data: CheatUpdate): Promise<ApiResult<Cheat>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('cheats')
+    .update(data as never)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 删除秘籍 */
+export async function adminDeleteCheat(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('cheats').delete().eq('id', id);
   if (error) return fail(error.message);
   return ok(undefined);
 }

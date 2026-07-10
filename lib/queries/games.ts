@@ -5,7 +5,7 @@
 
 import { createServerClient } from '@/lib/supabaseClient';
 import { ok, fail, type ApiResult } from '@/lib/api';
-import type { Game, Platform, Genre, Tag, Character, Boss, GameWithRelations } from '@/types/database';
+import type { Game, Platform, Genre, Tag, Character, Boss, Item, Cheat, GameWithRelations } from '@/types/database';
 
 /** 游戏列表项（含平台，用于卡片展示） */
 export interface GameListItem extends Game {
@@ -225,6 +225,30 @@ export async function getBossesByGameId(gameId: string): Promise<ApiResult<Boss[
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('bosses')
+    .select('*')
+    .eq('game_id', gameId)
+    .order('created_at', { ascending: true });
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 获取游戏的道具列表 */
+export async function getItemsByGameId(gameId: string): Promise<ApiResult<Item[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('game_id', gameId)
+    .order('created_at', { ascending: true });
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 获取游戏的秘籍列表 */
+export async function getCheatsByGameId(gameId: string): Promise<ApiResult<Cheat[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('cheats')
     .select('*')
     .eq('game_id', gameId)
     .order('created_at', { ascending: true });

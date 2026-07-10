@@ -3,10 +3,19 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { PlatformBadge } from '@/components/PlatformBadge';
-import { getGameBySlug, getCharactersByGameId, getBossesByGameId } from '@/lib/queries/games';
+import { getGameBySlug, getCharactersByGameId, getBossesByGameId, getItemsByGameId, getCheatsByGameId } from '@/lib/queries/games';
 import { getGuidesByGameId, GUIDE_TYPE_LABELS } from '@/lib/queries/guides';
 import { getSeoMetadata } from '@/lib/queries/seo';
 import type { GameWithRelations } from '@/types/database';
+
+/** 道具类型中文映射 */
+const ITEM_TYPE_LABELS: Record<string, string> = {
+  weapon: '武器',
+  armor: '防具',
+  magic: '魔法',
+  item: '道具',
+  accessory: '配饰',
+};
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -44,13 +53,17 @@ export default async function GameDetailPage({ params }: PageProps) {
   const guidesResult = await getGuidesByGameId(game.id);
   const guides = guidesResult.success ? guidesResult.data : [];
 
-  // 查询角色和 Boss
-  const [charactersRes, bossesRes] = await Promise.all([
+  // 查询角色、Boss、道具、秘籍
+  const [charactersRes, bossesRes, itemsRes, cheatsRes] = await Promise.all([
     getCharactersByGameId(game.id),
     getBossesByGameId(game.id),
+    getItemsByGameId(game.id),
+    getCheatsByGameId(game.id),
   ]);
   const characters = charactersRes.success ? charactersRes.data : [];
   const bosses = bossesRes.success ? bossesRes.data : [];
+  const items = itemsRes.success ? itemsRes.data : [];
+  const cheats = cheatsRes.success ? cheatsRes.data : [];
 
   // Game Schema.org 结构化数据（对应 docs/07-seo-architecture.md §8）
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -212,6 +225,75 @@ export default async function GameDetailPage({ params }: PageProps) {
                 )}
                 {boss.strategy && (
                   <p className="mt-1 text-xs text-blue-500">策略：{boss.strategy}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 道具列表 */}
+      {items.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">道具</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
+                  <div className="flex gap-2">
+                    <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      {ITEM_TYPE_LABELS[item.type] || item.type}
+                    </span>
+                    {item.rarity && (
+                      <span className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                        {item.rarity}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {item.description && (
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                    {item.description}
+                  </p>
+                )}
+                {item.effect && (
+                  <p className="mt-1 text-xs text-green-500">效果：{item.effect}</p>
+                )}
+                {item.location && (
+                  <p className="mt-1 text-xs text-gray-400">获取：{item.location}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 秘籍列表 */}
+      {cheats.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">秘籍</h2>
+          <div className="space-y-3">
+            {cheats.map((cheat) => (
+              <div
+                key={cheat.id}
+                className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-gray-900 dark:text-white">{cheat.title}</h3>
+                  {cheat.code && (
+                    <code className="rounded bg-gray-100 px-2 py-1 text-sm font-mono text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                      {cheat.code}
+                    </code>
+                  )}
+                </div>
+                {cheat.description && (
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    {cheat.description}
+                  </p>
                 )}
               </div>
             ))}
