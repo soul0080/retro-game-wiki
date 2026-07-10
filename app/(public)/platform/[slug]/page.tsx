@@ -4,6 +4,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { GameCard } from '@/components/GameCard';
 import { getPlatformBySlug } from '@/lib/queries/platforms';
 import { getGamesByPlatformSlug } from '@/lib/queries/games';
+import { getSeoMetadata } from '@/lib/queries/seo';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -13,9 +14,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const result = await getPlatformBySlug(slug);
   if (!result.success) return { title: '平台不存在' };
+  const platform = result.data;
+  // 查询 seo_metadata（唯一数据源，无记录则 fallback 到平台字段）
+  const seoResult = await getSeoMetadata('platform', platform.id);
+  const seo = seoResult.success ? seoResult.data : null;
   return {
-    title: `${result.data.name} 游戏`,
-    description: `${result.data.name} 平台游戏库 - ${result.data.description || ''}`,
+    title: seo?.title || `${platform.name} 游戏`,
+    description: seo?.description || `${platform.name} 平台游戏库 - ${platform.description || ''}`,
+    keywords: seo?.keywords || undefined,
+    alternates: seo?.canonical_url ? { canonical: seo.canonical_url } : undefined,
+    openGraph: seo?.og_image_url ? { images: [seo.og_image_url] } : undefined,
+    robots: seo?.noindex ? { index: false, follow: false } : undefined,
   };
 }
 

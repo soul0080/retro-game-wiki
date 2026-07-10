@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { adminGetGuides } from '@/lib/queries/admin';
 import { GUIDE_TYPE_LABELS } from '@/lib/queries/guides';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const metadata = { title: '攻略管理 · 后台' };
 
@@ -80,6 +81,7 @@ export default async function AdminGuidesPage() {
                         查看
                       </Link>
                     )}
+                    <DeleteButton endpoint={`/api/admin/guides/${guide.id}`} />
                   </td>
                 </tr>
               ))

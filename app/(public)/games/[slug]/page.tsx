@@ -5,22 +5,31 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PlatformBadge } from '@/components/PlatformBadge';
 import { getGameBySlug } from '@/lib/queries/games';
 import { getGuidesByGameId } from '@/lib/queries/guides';
+import { getSeoMetadata } from '@/lib/queries/seo';
 import type { GameWithRelations } from '@/types/database';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-/** 静态生成 SEO metadata */
+/** 静态生成 SEO metadata（seo_metadata 表为唯一数据源） */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const result = await getGameBySlug(slug);
   if (!result.success) return { title: '游戏不存在' };
 
   const game = result.data;
+  // 查询 seo_metadata（唯一数据源，无记录则 fallback 到游戏字段）
+  const seoResult = await getSeoMetadata('game', game.id);
+  const seo = seoResult.success ? seoResult.data : null;
+
   return {
-    title: game.name_cn,
-    description: game.description || `${game.name_cn} - 攻略、角色、Boss 资料`,
+    title: seo?.title || game.name_cn,
+    description: seo?.description || game.description || `${game.name_cn} - 攻略、角色、Boss 资料`,
+    keywords: seo?.keywords || undefined,
+    alternates: seo?.canonical_url ? { canonical: seo.canonical_url } : undefined,
+    openGraph: seo?.og_image_url ? { images: [seo.og_image_url] } : undefined,
+    robots: seo?.noindex ? { index: false, follow: false } : undefined,
   };
 }
 

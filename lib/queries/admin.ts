@@ -195,6 +195,27 @@ export async function adminGetStats(): Promise<
   });
 }
 
+// ============ 删除 ============
+
+/** 删除游戏（含关联表） */
+export async function adminDeleteGame(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  // 先删关联（保险起见，表可能已有 ON DELETE CASCADE）
+  await supabase.from('game_platforms').delete().eq('game_id', id);
+  await supabase.from('game_genres').delete().eq('game_id', id);
+  const { error } = await supabase.from('games').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
+/** 删除攻略 */
+export async function adminDeleteGuide(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('guides').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
 // 重导出平台/类型查询供 admin 表单使用
 export { getPlatforms, getGenres } from '@/lib/queries/platforms';
 export type { Platform, Genre };

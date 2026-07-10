@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { adminGetGames } from '@/lib/queries/admin';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const metadata = { title: '游戏管理 · 后台' };
 
@@ -78,6 +79,7 @@ export default async function AdminGamesPage() {
                         查看
                       </Link>
                     )}
+                    <DeleteButton endpoint={`/api/admin/games/${game.id}`} />
                   </td>
                 </tr>
               ))

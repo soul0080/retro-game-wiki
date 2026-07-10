@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { adminUpdateGuide } from '@/lib/queries/admin';
+import { adminUpdateGuide, adminDeleteGuide } from '@/lib/queries/admin';
 
 export async function PUT(
   request: NextRequest,
@@ -17,4 +17,16 @@ export async function PUT(
     return NextResponse.json({ success: false, error: result.error }, { status: 400 });
   }
   return NextResponse.json({ success: true, data: result.data });
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const result = await adminDeleteGuide(id);
+  if (!result.success) {
+    return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+  }
+  return NextResponse.json({ success: true });
 }

@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { getGuideBySlug, GUIDE_TYPE_LABELS } from '@/lib/queries/guides';
+import { getSeoMetadata } from '@/lib/queries/seo';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -18,9 +19,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const result = await getGuideBySlug(slug);
   if (!result.success) return { title: '攻略不存在' };
   const guide = result.data;
+  // 查询 seo_metadata（唯一数据源，无记录则 fallback 到攻略字段）
+  const seoResult = await getSeoMetadata('guide', guide.id);
+  const seo = seoResult.success ? seoResult.data : null;
   return {
-    title: guide.title,
-    description: guide.summary || `${guide.title} - 详细攻略`,
+    title: seo?.title || guide.title,
+    description: seo?.description || guide.summary || `${guide.title} - 详细攻略`,
+    keywords: seo?.keywords || undefined,
+    alternates: seo?.canonical_url ? { canonical: seo.canonical_url } : undefined,
+    openGraph: seo?.og_image_url ? { images: [seo.og_image_url] } : undefined,
+    robots: seo?.noindex ? { index: false, follow: false } : undefined,
   };
 }
 
