@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { GameCard } from '@/components/GameCard';
 import { getPublishedGames } from '@/lib/queries/games';
 import { getFeaturedGuides, GUIDE_TYPE_LABELS } from '@/lib/queries/guides';
-import { getPlatforms } from '@/lib/queries/platforms';
+import { getPlatforms, getEmulatorGuides } from '@/lib/queries/platforms';
+import { getLatestNews } from '@/lib/queries/news';
 
 export const metadata: Metadata = {
   title: 'Retro Game Wiki - 中文经典游戏百科站',
@@ -18,15 +19,19 @@ function formatDate(iso: string): string {
 }
 
 export default async function HomePage() {
-  const [gamesResult, guidesResult, platformsResult] = await Promise.all([
+  const [gamesResult, guidesResult, platformsResult, newsResult, emulatorsResult] = await Promise.all([
     getPublishedGames({ page: 1, pageSize: 8 }),
     getFeaturedGuides(6),
     getPlatforms(),
+    getLatestNews(5),
+    getEmulatorGuides(),
   ]);
 
   const games = gamesResult.success ? gamesResult.data.items : [];
   const guides = guidesResult.success ? guidesResult.data : [];
   const platforms = platformsResult.success ? platformsResult.data : [];
+  const newsList = newsResult.success ? newsResult.data : [];
+  const emulatorGuides = (emulatorsResult.success ? emulatorsResult.data : []).slice(0, 4);
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const websiteSchema = {
@@ -166,6 +171,62 @@ export default async function HomePage() {
               </article>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* 模拟器教程推荐 */}
+      {emulatorGuides.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">模拟器教程</h2>
+            <Link href="/emulators" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
+              更多 →
+            </Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {emulatorGuides.map((eg) => (
+              <Link
+                key={eg.id}
+                href={`/emulators/${eg.slug}`}
+                className="block rounded-lg border border-gray-200 p-4 transition hover:border-gray-300 hover:shadow-sm dark:border-gray-800 dark:hover:border-gray-700"
+              >
+                <h3 className="font-medium text-gray-900 dark:text-white">{eg.title}</h3>
+                {eg.platform && (
+                  <p className="mt-1 text-xs text-gray-400">{eg.platform.name}</p>
+                )}
+                {eg.software && (
+                  <p className="mt-1 text-xs text-blue-500">{eg.software}</p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 最新新闻 */}
+      {newsList.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">最新资讯</h2>
+          </div>
+          <ul className="divide-y divide-gray-200 dark:divide-gray-800">
+            {newsList.map((news) => (
+              <li key={news.id} className="py-3">
+                <Link
+                  href={`/news/${news.slug}`}
+                  className="flex items-center justify-between gap-4 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  <span className="font-medium text-gray-900 dark:text-white">{news.title}</span>
+                  <span className="shrink-0 text-xs text-gray-400">
+                    {news.published_at ? formatDate(news.published_at) : formatDate(news.updated_at)}
+                  </span>
+                </Link>
+                {news.source && (
+                  <p className="mt-0.5 text-xs text-gray-400">来源：{news.source}</p>
+                )}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

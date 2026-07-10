@@ -1,12 +1,13 @@
 import type { MetadataRoute } from 'next';
 import { getPublishedGameSlugs } from '@/lib/queries/games';
 import { getPublishedGuideSlugs } from '@/lib/queries/guides';
-import { getPlatforms } from '@/lib/queries/platforms';
+import { getPlatforms, getEmulatorGuideSlugs } from '@/lib/queries/platforms';
+import { getPublishedNewsSlugs } from '@/lib/queries/news';
 
 /**
  * 动态 sitemap.xml
  * 对应 docs/07-seo-architecture.md §9
- * 包含：首页、列表页、平台页、游戏详情页、攻略详情页
+ * 包含：首页、列表页、平台页、游戏详情页、攻略详情页、模拟器教程页、新闻页
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -17,6 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/`, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
     { url: `${siteUrl}/games`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     { url: `${siteUrl}/guides`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${siteUrl}/emulators`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${siteUrl}/search`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
   ];
 
   // 平台页
@@ -46,5 +49,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...platformEntries, ...gameEntries, ...guideEntries];
+  // 模拟器教程详情页
+  const emulatorsResult = await getEmulatorGuideSlugs();
+  const emulatorEntries: MetadataRoute.Sitemap = (emulatorsResult.success ? emulatorsResult.data : []).map((g) => ({
+    url: `${siteUrl}/emulators/${g.slug}`,
+    lastModified: new Date(g.updated_at),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  // 新闻详情页
+  const newsResult = await getPublishedNewsSlugs();
+  const newsEntries: MetadataRoute.Sitemap = (newsResult.success ? newsResult.data : []).map((n) => ({
+    url: `${siteUrl}/news/${n.slug}`,
+    lastModified: new Date(n.updated_at),
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }));
+
+  return [...staticEntries, ...platformEntries, ...gameEntries, ...guideEntries, ...emulatorEntries, ...newsEntries];
 }

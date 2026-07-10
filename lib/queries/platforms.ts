@@ -63,6 +63,16 @@ export async function getEmulatorGuideBySlug(slug: string): Promise<ApiResult<Em
   return ok({ ...guide, platform: (platform as Platform | null) || null });
 }
 
+/** 获取所有模拟器教程的 slug（sitemap 用） */
+export async function getEmulatorGuideSlugs(): Promise<ApiResult<{ slug: string; updated_at: string }[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('emulator_guides')
+    .select('slug, updated_at');
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
 /** 按 slug 获取平台 */
 export async function getPlatformBySlug(slug: string): Promise<ApiResult<Platform>> {
   const supabase = createServerClient();
