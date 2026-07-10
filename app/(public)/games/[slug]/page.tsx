@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { PlatformBadge } from '@/components/PlatformBadge';
 import { getGameBySlug } from '@/lib/queries/games';
-import { getGuidesByGameId } from '@/lib/queries/guides';
+import { getGuidesByGameId, GUIDE_TYPE_LABELS } from '@/lib/queries/guides';
 import { getSeoMetadata } from '@/lib/queries/seo';
 import type { GameWithRelations } from '@/types/database';
 
@@ -154,29 +154,13 @@ export default async function GameDetailPage({ params }: PageProps) {
                 {guide.summary && (
                   <p className="mt-1 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">{guide.summary}</p>
                 )}
-                <span className="mt-2 inline-block text-xs text-gray-400">{guide.guide_type}</span>
+                <span className="mt-2 inline-block text-xs text-gray-400">{GUIDE_TYPE_LABELS[guide.guide_type] || guide.guide_type}</span>
               </Link>
             ))}
           </div>
         </section>
       )}
 
-      {/* Game Schema for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'VideoGame',
-            name: game.name_cn,
-            alternateName: game.name_en,
-            datePublished: game.release_year?.toString(),
-            developer: game.developer ? { '@type': 'Organization', name: game.developer } : undefined,
-            publisher: game.publisher ? { '@type': 'Organization', name: game.publisher } : undefined,
-            description: game.description,
-          }),
-        }}
-      />
       {/* Game Schema.org 结构化数据 */}
       <script
         type="application/ld+json"
