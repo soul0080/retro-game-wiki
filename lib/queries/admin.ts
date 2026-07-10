@@ -6,7 +6,7 @@
 
 import { createServerClient } from '@/lib/supabaseClient';
 import { ok, fail, type ApiResult } from '@/lib/api';
-import type { Game, Guide, Platform, Genre } from '@/types/database';
+import type { Game, Guide, Platform, Genre, Character, Boss } from '@/types/database';
 
 // ============ 读取（含草稿） ============
 
@@ -219,3 +219,125 @@ export async function adminDeleteGuide(id: string): Promise<ApiResult<void>> {
 // 重导出平台/类型查询供 admin 表单使用
 export { getPlatforms, getGenres } from '@/lib/queries/platforms';
 export type { Platform, Genre };
+
+// ============ 角色管理 ============
+
+type CharacterInsert = Omit<Character, 'id' | 'created_at' | 'updated_at'>;
+type CharacterUpdate = Partial<CharacterInsert>;
+
+/** 获取角色列表（可按 game_id 筛选），按 updated_at desc 排序 */
+export async function adminGetCharacters(
+  gameId?: string
+): Promise<ApiResult<Character[]>> {
+  const supabase = createServerClient();
+  let query = supabase
+    .from('characters')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (gameId) query = query.eq('game_id', gameId);
+  const { data, error } = await query;
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 按 id 获取角色 */
+export async function adminGetCharacterById(id: string): Promise<ApiResult<Character>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.from('characters').select('*').eq('id', id).single();
+  if (error || !data) return fail('角色不存在');
+  return ok(data);
+}
+
+/** 新增角色 */
+export async function adminCreateCharacter(data: CharacterInsert): Promise<ApiResult<Character>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('characters')
+    .insert(data as never)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 更新角色 */
+export async function adminUpdateCharacter(id: string, data: CharacterUpdate): Promise<ApiResult<Character>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('characters')
+    .update(data as never)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 删除角色 */
+export async function adminDeleteCharacter(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('characters').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}
+
+// ============ Boss 管理 ============
+
+type BossInsert = Omit<Boss, 'id' | 'created_at' | 'updated_at'>;
+type BossUpdate = Partial<BossInsert>;
+
+/** 获取 Boss 列表（可按 game_id 筛选），按 updated_at desc 排序 */
+export async function adminGetBosses(
+  gameId?: string
+): Promise<ApiResult<Boss[]>> {
+  const supabase = createServerClient();
+  let query = supabase
+    .from('bosses')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (gameId) query = query.eq('game_id', gameId);
+  const { data, error } = await query;
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 按 id 获取 Boss */
+export async function adminGetBossById(id: string): Promise<ApiResult<Boss>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.from('bosses').select('*').eq('id', id).single();
+  if (error || !data) return fail('Boss 不存在');
+  return ok(data);
+}
+
+/** 新增 Boss */
+export async function adminCreateBoss(data: BossInsert): Promise<ApiResult<Boss>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('bosses')
+    .insert(data as never)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 更新 Boss */
+export async function adminUpdateBoss(id: string, data: BossUpdate): Promise<ApiResult<Boss>> {
+  const supabase = createServerClient();
+  const { data: row, error } = await supabase
+    .from('bosses')
+    .update(data as never)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) return fail(error.message);
+  return ok(row);
+}
+
+/** 删除 Boss */
+export async function adminDeleteBoss(id: string): Promise<ApiResult<void>> {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('bosses').delete().eq('id', id);
+  if (error) return fail(error.message);
+  return ok(undefined);
+}

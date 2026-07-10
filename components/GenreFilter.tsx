@@ -1,20 +1,20 @@
 import Link from 'next/link';
-import type { Platform } from '@/types/database';
+import type { Genre } from '@/types/database';
 
 /**
- * 平台筛选栏
- * 用于游戏库列表页的平台筛选
+ * 类型筛选栏
+ * 用于游戏库列表页的类型筛选（与平台筛选共存）
  */
 
-interface PlatformFilterProps {
-  platforms: Platform[];
+interface GenreFilterProps {
+  genres: Genre[];
   activeSlug?: string;
-  // 当前 genre 筛选，用于在切换 platform 时保留 genre
-  genreSlug?: string;
+  // 当前 platform 筛选，用于在切换 genre 时保留 platform
+  platformSlug?: string;
 }
 
-export function PlatformFilter({ platforms, activeSlug, genreSlug }: PlatformFilterProps) {
-  const buildHref = (platformSlug?: string) => {
+export function GenreFilter({ genres, activeSlug, platformSlug }: GenreFilterProps) {
+  const buildHref = (genreSlug?: string) => {
     const params = new URLSearchParams();
     if (platformSlug) params.set('platform', platformSlug);
     if (genreSlug) params.set('genre', genreSlug);
@@ -32,19 +32,19 @@ export function PlatformFilter({ platforms, activeSlug, genreSlug }: PlatformFil
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
         }`}
       >
-        全部
+        全部类型
       </Link>
-      {platforms.map((p) => (
+      {genres.map((g) => (
         <Link
-          key={p.id}
-          href={buildHref(p.slug)}
+          key={g.id}
+          href={buildHref(g.slug)}
           className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-            activeSlug === p.slug
+            activeSlug === g.slug
               ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           }`}
         >
-          {p.name}
+          {g.name}
         </Link>
       ))}
     </div>

@@ -5,7 +5,7 @@
 
 import { createServerClient } from '@/lib/supabaseClient';
 import { ok, fail, type ApiResult } from '@/lib/api';
-import type { Game, Platform, Genre, Tag, GameWithRelations } from '@/types/database';
+import type { Game, Platform, Genre, Tag, Character, Boss, GameWithRelations } from '@/types/database';
 
 /** 游戏列表项（含平台，用于卡片展示） */
 export interface GameListItem extends Game {
@@ -18,14 +18,17 @@ export interface GameListItem extends Game {
  */
 export async function getPublishedGames(options?: {
   platformSlug?: string;
+  genreSlug?: string;
   page?: number;
   pageSize?: number;
 }): Promise<ApiResult<{ items: GameListItem[]; total: number }>> {
-  const { platformSlug, page = 1, pageSize = 24 } = options || {};
+  const { platformSlug, genreSlug, page = 1, pageSize = 24 } = options || {};
   const supabase = createServerClient();
 
+  // 收集筛选条件对应的 game_id 集合（取交集）
+  const idSets: string[][] = [];
+
   // 若按平台筛选，先取该平台下的 game_id 集合
-  let scopedGameIds: string[] | null = null;
   if (platformSlug) {
     const { data, error: pErr } = await supabase
       .from('platforms')
@@ -38,7 +41,33 @@ export async function getPublishedGames(options?: {
       .from('game_platforms')
       .select('*')
       .eq('platform_id', platform.id);
-    scopedGameIds = ((gp || []) as { game_id: string }[]).map((r) => r.game_id);
+    const ids = ((gp || []) as { game_id: string }[]).map((r) => r.game_id);
+    if (ids.length === 0) return ok({ items: [], total: 0 });
+    idSets.push(ids);
+  }
+
+  // 若按类型筛选，先取该类型下的 game_id 集合
+  if (genreSlug) {
+    const { data, error: gErr } = await supabase
+      .from('genres')
+      .select('*')
+      .eq('slug', genreSlug)
+      .single();
+    if (gErr || !data) return ok({ items: [], total: 0 });
+    const genre: Genre = data;
+    const { data: gg } = await supabase
+      .from('game_genres')
+      .select('*')
+      .eq('genre_id', genre.id);
+    const ids = ((gg || []) as { game_id: string }[]).map((r) => r.game_id);
+    if (ids.length === 0) return ok({ items: [], total: 0 });
+    idSets.push(ids);
+  }
+
+  // 取所有筛选集合的交集
+  let scopedGameIds: string[] | null = null;
+  if (idSets.length > 0) {
+    scopedGameIds = idSets.reduce((acc, set) => acc.filter((id) => set.includes(id)));
     if (scopedGameIds.length === 0) return ok({ items: [], total: 0 });
   }
 
@@ -177,4 +206,28 @@ export async function getGamesByPlatformSlug(
 
   if (error) return fail(error.message);
   return ok(gamesData || []);
+}
+
+/** 获取游戏的角色列表 */
+export async function getCharactersByGameId(gameId: string): Promise<ApiResult<Character[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('characters')
+    .select('*')
+    .eq('game_id', gameId)
+    .order('created_at', { ascending: true });
+  if (error) return fail(error.message);
+  return ok(data || []);
+}
+
+/** 获取游戏的 Boss 列表 */
+export async function getBossesByGameId(gameId: string): Promise<ApiResult<Boss[]>> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('bosses')
+    .select('*')
+    .eq('game_id', gameId)
+    .order('created_at', { ascending: true });
+  if (error) return fail(error.message);
+  return ok(data || []);
 }

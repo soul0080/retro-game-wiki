@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { PlatformBadge } from '@/components/PlatformBadge';
-import { getGameBySlug } from '@/lib/queries/games';
+import { getGameBySlug, getCharactersByGameId, getBossesByGameId } from '@/lib/queries/games';
 import { getGuidesByGameId, GUIDE_TYPE_LABELS } from '@/lib/queries/guides';
 import { getSeoMetadata } from '@/lib/queries/seo';
 import type { GameWithRelations } from '@/types/database';
@@ -43,6 +43,14 @@ export default async function GameDetailPage({ params }: PageProps) {
   // 查询该游戏的攻略
   const guidesResult = await getGuidesByGameId(game.id);
   const guides = guidesResult.success ? guidesResult.data : [];
+
+  // 查询角色和 Boss
+  const [charactersRes, bossesRes] = await Promise.all([
+    getCharactersByGameId(game.id),
+    getBossesByGameId(game.id),
+  ]);
+  const characters = charactersRes.success ? charactersRes.data : [];
+  const bosses = bossesRes.success ? bossesRes.data : [];
 
   // Game Schema.org 结构化数据（对应 docs/07-seo-architecture.md §8）
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -138,6 +146,78 @@ export default async function GameDetailPage({ params }: PageProps) {
           )}
         </div>
       </div>
+
+      {/* 角色列表 */}
+      {characters.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">角色</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {characters.map((char) => (
+              <div
+                key={char.id}
+                className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
+              >
+                <div className="flex items-center gap-3">
+                  {char.image_url && (
+                    <img
+                      src={char.image_url}
+                      alt={char.name}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">{char.name}</h3>
+                    {char.nickname && (
+                      <p className="text-xs text-gray-400">{char.nickname}</p>
+                    )}
+                  </div>
+                </div>
+                {char.description && (
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
+                    {char.description}
+                  </p>
+                )}
+                {char.join_method && (
+                  <p className="mt-1 text-xs text-gray-400">加入方式：{char.join_method}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Boss 列表 */}
+      {bosses.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">Boss</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {bosses.map((boss) => (
+              <div
+                key={boss.id}
+                className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-gray-900 dark:text-white">{boss.name}</h3>
+                  {boss.hp && (
+                    <span className="text-xs text-red-500">HP {boss.hp}</span>
+                  )}
+                </div>
+                {boss.description && (
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                    {boss.description}
+                  </p>
+                )}
+                {boss.weakness && (
+                  <p className="mt-1 text-xs text-orange-500">弱点：{boss.weakness}</p>
+                )}
+                {boss.strategy && (
+                  <p className="mt-1 text-xs text-blue-500">策略：{boss.strategy}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 攻略列表 */}
       {guides.length > 0 && (
